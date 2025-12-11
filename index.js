@@ -205,15 +205,25 @@ async function main() {
     process.exit(1);
   }
 
+  // Check if running in GitHub Actions
+  const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
+
   // Post an initial joke on startup
   logEvent('Posting initial joke...');
   try {
     await postJokeToSlack();
+    if (isGitHubActions) {
+      logEvent('Running in GitHub Actions - exiting after post');
+      process.exit(0);
+    }
   } catch (error) {
     logEvent(`Failed to post initial joke: ${error.message}`, 'ERROR');
+    if (isGitHubActions) {
+      process.exit(1);
+    }
   }
 
-  // Schedule future jokes
+  // Schedule future jokes (only if NOT in GitHub Actions)
   logEvent(`Scheduled to post jokes on cron: ${CRON_SCHEDULE}`);
   cron.schedule(CRON_SCHEDULE, async () => {
     try {
