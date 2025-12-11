@@ -162,6 +162,17 @@ async function postJokeToSlack() {
       setTimeout(() => reject(new Error('Slack API timeout after 10 seconds')), 10000)
     );
 
+    // Try to join the channel first (in case bot isn't a member)
+    try {
+      await Promise.race([
+        slack.conversations.join({ channel: CHANNEL_ID }),
+        timeoutPromise,
+      ]);
+      logEvent('Joined channel successfully');
+    } catch (joinError) {
+      logEvent(`Could not join channel (may already be member): ${joinError.message}`);
+    }
+
     await Promise.race([
       slack.chat.postMessage({
         channel: CHANNEL_ID,
