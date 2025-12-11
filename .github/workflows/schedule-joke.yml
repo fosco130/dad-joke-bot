@@ -1,0 +1,31 @@
+name: Post Dad Joke
+
+on:
+  schedule:
+    # Runs at 5 PM UTC every weekday (Monday-Friday)
+    # Adjust the time by changing the first two numbers (hour minute)
+    - cron: '0 17 * * 1-5'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  post-joke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Post joke to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          BOT_EMOJI: ':man_with_mustache:'
+        run: node index.js

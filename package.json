@@ -1,0 +1,23 @@
+{
+  "name": "dad-joke-bot",
+  "version": "1.0.0",
+  "description": "Automatically posts terrible dad jokes to a Slack channel on a schedule",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "slack",
+    "bot",
+    "dad-jokes",
+    "humor"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/web-api": "^7.0.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0",
+    "node-cron": "^3.0.3"
+  }
+}
