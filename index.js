@@ -157,14 +157,22 @@ async function postJokeToSlack() {
       },
     ];
 
-    await slack.chat.postMessage({
-      channel: CHANNEL_ID,
-      blocks: blocks,
-      text: joke,
-      unfurl_links: false,
-      icon_emoji: BOT_EMOJI,
-      username: 'Dad Joke Bot',
-    });
+    // Create a promise that rejects after 10 seconds
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Slack API timeout after 10 seconds')), 10000)
+    );
+
+    await Promise.race([
+      slack.chat.postMessage({
+        channel: CHANNEL_ID,
+        blocks: blocks,
+        text: joke,
+        unfurl_links: false,
+        icon_emoji: BOT_EMOJI,
+        username: 'Dad Joke Bot',
+      }),
+      timeoutPromise,
+    ]);
 
     // Add to history and save
     jokeHistory.push(joke);
