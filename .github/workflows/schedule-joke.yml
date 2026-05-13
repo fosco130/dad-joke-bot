@@ -2,9 +2,11 @@ name: Post Dad Joke
 
 on:
   schedule:
-    # Runs at 5 PM UTC every weekday (Monday-Friday)
-    # Adjust the time by changing the first two numbers (hour minute)
-    - cron: '0 17 * * 1-5'
+    # Runs at 5 PM BST every weekday (Monday-Friday) — 16:00 UTC.
+    # Note: GitHub Actions cron is UTC only, so during GMT (late Oct – late Mar)
+    # this fires at 4 PM London time. Bump the hour back to 17 to track GMT
+    # if that matters, or live with the winter hour drift.
+    - cron: '0 16 * * 1-5'
   workflow_dispatch: # Allows manual triggering
 
 jobs:
