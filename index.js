@@ -81,9 +81,15 @@ const FALLBACK_JOKES = [
   "I used to hate facial hair, but then it grew on me.",
 ];
 
+// Pun + Misc gives a dad-joke core with a slightly broader pool. Blacklist the
+// genuinely offensive flags but leave `nsfw` allowed — in JokeAPI's taxonomy
+// that's where the mild innuendo lives, which is the edge we want.
+const JOKE_API_URL =
+  'https://v2.jokeapi.dev/joke/Pun,Misc?blacklistFlags=racist,sexist,explicit,religious,political';
+
 /**
- * Fetches a random dad joke from icanhazdadjoke.com
- * Filters for safe-for-work jokes only (offensive flag = false)
+ * Fetches a random dad joke from JokeAPI (jokeapi.dev).
+ * Handles both single and two-part jokes.
  */
 async function getDadJoke(retries = 3) {
   const maxAttempts = retries;
@@ -91,24 +97,19 @@ async function getDadJoke(retries = 3) {
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const response = await axios.get('https://icanhazdadjoke.com/', {
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': 'Dad Joke Slack Bot (https://github.com/yourusername/dad-joke-bot)',
-        },
-        timeout: 5000,
-      });
+      const response = await axios.get(JOKE_API_URL, { timeout: 5000 });
 
-      const joke = response.data.joke;
-      const isOffensive = response.data.offensive || false;
-
-      // Skip offensive jokes
-      if (isOffensive) {
-        logEvent(`Skipped offensive joke (attempt ${attempt}/${maxAttempts})`, 'DEBUG');
+      // JokeAPI returns HTTP 200 with error:true in the body when no joke matches
+      if (response.data.error) {
+        logEvent(`JokeAPI returned error (attempt ${attempt}/${maxAttempts}): ${response.data.message}`, 'WARN');
         continue;
       }
 
-      // Check if joke was recently posted
+      const joke =
+        response.data.type === 'twopart'
+          ? `${response.data.setup}\n\n${response.data.delivery}`
+          : response.data.joke;
+
       if (jokeHistory.includes(joke)) {
         logEvent(`Skipped recently posted joke (attempt ${attempt}/${maxAttempts})`, 'DEBUG');
         continue;
