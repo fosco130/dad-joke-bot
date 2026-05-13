@@ -81,11 +81,11 @@ const FALLBACK_JOKES = [
   "I used to hate facial hair, but then it grew on me.",
 ];
 
-// Pun + Misc gives a dad-joke core with a slightly broader pool. Blacklist the
-// genuinely offensive flags but leave `nsfw` allowed — in JokeAPI's taxonomy
-// that's where the mild innuendo lives, which is the edge we want.
+// Safe-mode returns only jokes JokeAPI has affirmatively certified as
+// inoffensive. The blacklistFlags param is kept as belt-and-braces in case
+// safe-mode is ever relaxed upstream.
 const JOKE_API_URL =
-  'https://v2.jokeapi.dev/joke/Pun,Misc?blacklistFlags=racist,sexist,explicit,religious,political';
+  'https://v2.jokeapi.dev/joke/Pun,Misc?blacklistFlags=racist,sexist,explicit,religious,political,nsfw&safe-mode';
 
 /**
  * Fetches a random dad joke from JokeAPI (jokeapi.dev).
